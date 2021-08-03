@@ -4,20 +4,21 @@ const {google} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
 const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
-// The file token.json stores the user's access and refresh tokens, and is created automatically when the authorization flow completes for the first time.
+// The file token.json stores the user's access and refresh tokens, and is
+// created automatically when the authorization flow completes for the first
+// time.
 const TOKEN_PATH = 'token.json';
 
 // Load client secrets from a local file.
-const getAuth = (callback) => {
-  fs.readFile('credentials.json', (err, content) => {
-    if (err) return console.log('Error loading client secret file:', err);
-    // Authorize a client with credentials, then call the Google Drive API.
-    return authorize(JSON.parse(content), callback);
-  });
-}
+fs.readFile('credentials.json', (err, content) => {
+  if (err) return console.log('Error loading client secret file:', err);
+  // Authorize a client with credentials, then call the Google Drive API.
+  authorize(JSON.parse(content), listFiles);
+});
 
 /**
- * Create an OAuth2 client with the given credentials, and then execute the given callback function.
+ * Create an OAuth2 client with the given credentials, and then execute the
+ * given callback function.
  * @param {Object} credentials The authorization client credentials.
  * @param {function} callback The callback to call with the authorized client.
  */
@@ -30,7 +31,7 @@ function authorize(credentials, callback) {
   fs.readFile(TOKEN_PATH, (err, token) => {
     if (err) return getAccessToken(oAuth2Client, callback);
     oAuth2Client.setCredentials(JSON.parse(token));
-    return callback(oAuth2Client);
+    callback(oAuth2Client);
   });
 }
 
@@ -60,52 +61,30 @@ function getAccessToken(oAuth2Client, callback) {
         if (err) return console.error(err);
         console.log('Token stored to', TOKEN_PATH);
       });
-      return callback(oAuth2Client);
+      callback(oAuth2Client);
     });
   });
 }
 
 /**
- * Lists the names and IDs of up to 2 files.
+ * Lists the names and IDs of up to 10 files.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
- function listFiles(auth) {
+function listFiles(auth) {
   const drive = google.drive({version: 'v3', auth});
-
   drive.files.list({
-    q: `'1XjZfBIpyR7xI9vDEPxsgFmQP2vF6pnSi' in parents`,
-    pageSize: 2,
-    fields: 'files(id)',
+    pageSize: 10,
+    fields: 'nextPageToken, files(id, name)',
   }, (err, res) => {
-
     if (err) return console.log('The API returned an error: ' + err);
-
     const files = res.data.files;
     if (files.length) {
-      const result = new Promise((resolve, reject) => {
-        files.map((file) => {
-          drive.files.get({
-            fileId: file.id,
-            fields: 'id, name, webContentLink',
-          }, (err, res) => {
-            if (err) reject(err);
-            resolve(res.data);
-          })
-        });
+      console.log('Files:');
+      files.map((file) => {
+        console.log(`${file.name} (${file.id})`);
       });
-      return result;
-    };
+    } else {
+      console.log('No files found.');
+    }
   });
 }
-
-const sayHellow = () => {
-  return new Promise((resolve, reject) => {
-    resolve("Toto");
-  });
-};
-
-module.exports = {
-  getAuth,
-  listFiles,
-  sayHellow,
-};

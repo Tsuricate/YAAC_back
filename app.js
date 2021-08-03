@@ -1,7 +1,5 @@
 const express = require('express');
 const app = express();
-const {google} = require('googleapis');
-const googleDrive = require('./googleDrive');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -12,13 +10,6 @@ app.use((req, res, next) => {
 
 app.get('/api/categories', (req, res, next) => {
   // console.log("SEPARATIOOOOOON");
-  // response.then
-  const response = googleDrive.getAuth(googleDrive.listFiles);
-  // console.log(googleDrive.sayHellow());
-    // .then((data) => {
-    //   console.log(data);
-    // });
-  
   
 /*   const response = {
     categories: [
