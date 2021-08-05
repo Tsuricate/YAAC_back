@@ -73,16 +73,20 @@ function getAccessToken(oAuth2Client, callback) {
 function listFilesId(auth) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    q: `'1XjZfBIpyR7xI9vDEPxsgFmQP2vF6pnSi' in parents`,
+    q: `'1XQXzpiqFt279_pBUPhSIzVvi7Ck8dmQ8' in parents`,
     pageSize: 20,
-    fields: 'nextPageToken, files(id, name)',
+    fields: 'nextPageToken, files(id, name, mimeType)',
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const files = res.data.files;
     if (files.length) {
-      console.log('Files:');
       files.map((file) => {
-        downloadFileById(auth, file.id, file.name);
+        if (file.mimeType === 'application/vnd.google-apps.folder') {
+           createFolder(file.name);
+        }
+        else {
+          // downloadFileById(auth, file.id, file.name);
+        }
       });
     } else {
       console.log('No files found.');
@@ -106,6 +110,16 @@ const downloadFileById = (auth, fileId, fileName) => {
     }
   )
   .catch((err) => {
-    console.log('ERRORRRREEEEEEEE :', err);
+    console.log('error :', err);
   });
 }
+
+const createFolder = (folderName) => {
+  fs.mkdir(`./assets/${folderName}`, (err) => {
+    if (err) {
+      console.log('Error creating new folder: ', err);
+    } else {
+      console.log("New folder successfully created.");
+    }
+  });
+};
