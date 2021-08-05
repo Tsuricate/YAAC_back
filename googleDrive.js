@@ -13,7 +13,7 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Drive API.
-  authorize(JSON.parse(content), listFilesId);
+  authorize(JSON.parse(content), downloadParentFolder);
 });
 
 /**
@@ -70,7 +70,7 @@ function getAccessToken(oAuth2Client, callback) {
  * Lists the names and IDs of up to 10 files.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listFilesId(auth) {
+function downloadParentFolder(auth) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
     q: `'1XQXzpiqFt279_pBUPhSIzVvi7Ck8dmQ8' in parents`,
@@ -83,9 +83,7 @@ function listFilesId(auth) {
       files.map((file) => {
         if (file.mimeType === 'application/vnd.google-apps.folder') {
            createFolder(file.name);
-        }
-        else {
-          // downloadFileById(auth, file.id, file.name);
+           downloadFolderContent(file.id, auth, file.name);
         }
       });
     } else {
@@ -94,9 +92,44 @@ function listFilesId(auth) {
   });
 }
 
-const downloadFileById = (auth, fileId, fileName) => {
+const createFolder = (folderName) => {
+  try {
+    if (!fs.existsSync(`./assets/${folderName}`)) {
+      fs.mkdirSync(`./assets/${folderName}`);
+    }
+  } catch (err) {
+    console.error('Error creating new folder: ', err);
+  }
+};
+
+const downloadFolderContent = (folderId, auth, folderName) => {
   const drive = google.drive({version: 'v3', auth});
-  const destination = fs.createWriteStream(`./assets/${fileName}`);
+  drive.files.list({
+    q: `'${folderId}' in parents`,
+    pageSize: 20,
+    fields: 'nextPageToken, files(id, name, mimeType)',
+  }, (err, res) => {
+    if (err) return console.log('The API returned an error: ' + err);
+    const files = res.data.files;
+    if (files.length) {
+      files.map((file) => {
+        if (file.mimeType === 'application/vnd.google-apps.folder') {
+           createFolder(file.name);
+           downloadFolderContent(file.id, auth, file.name);
+        }
+        else {
+          downloadFileById(auth, file.id, file.name, folderName);
+        }
+      });
+    } else {
+      console.log('No files found.');
+    }
+  });
+};
+
+const downloadFileById = (auth, fileId, fileName, folderName) => {
+  const drive = google.drive({version: 'v3', auth});
+  const destination = fs.createWriteStream(`./assets/${folderName}/${fileName}`);
   drive.files.get({fileId: fileId, alt: 'media', supportsAllDrives: true}, {responseType: 'stream'})
     .then(res => {
        res.data
@@ -114,12 +147,5 @@ const downloadFileById = (auth, fileId, fileName) => {
   });
 }
 
-const createFolder = (folderName) => {
-  fs.mkdir(`./assets/${folderName}`, (err) => {
-    if (err) {
-      console.log('Error creating new folder: ', err);
-    } else {
-      console.log("New folder successfully created.");
-    }
-  });
-};
+
+
