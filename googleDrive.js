@@ -3,7 +3,7 @@ const readline = require('readline');
 const {google} = require('googleapis');
 
 // If modifying these scopes, delete token.json.
-const SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly'];
+const SCOPES = ['https://www.googleapis.com/auth/drive.readonly'];
 // The file token.json stores the user's access and refresh tokens, and is
 // created automatically when the authorization flow completes for the first
 // time.
@@ -13,7 +13,7 @@ const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
   // Authorize a client with credentials, then call the Google Drive API.
-  authorize(JSON.parse(content), listFiles);
+  authorize(JSON.parse(content), listFilesId);
 });
 
 /**
@@ -70,10 +70,11 @@ function getAccessToken(oAuth2Client, callback) {
  * Lists the names and IDs of up to 10 files.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
-function listFiles(auth) {
+function listFilesId(auth) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    pageSize: 10,
+    q: `'1XjZfBIpyR7xI9vDEPxsgFmQP2vF6pnSi' in parents`,
+    pageSize: 20,
     fields: 'nextPageToken, files(id, name)',
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
@@ -81,10 +82,30 @@ function listFiles(auth) {
     if (files.length) {
       console.log('Files:');
       files.map((file) => {
-        console.log(`${file.name} (${file.id})`);
+        downloadFileById(auth, file.id, file.name);
       });
     } else {
       console.log('No files found.');
     }
+  });
+}
+
+const downloadFileById = (auth, fileId, fileName) => {
+  const drive = google.drive({version: 'v3', auth});
+  const destination = fs.createWriteStream(`./assets/${fileName}`);
+  drive.files.get({fileId: fileId, alt: 'media', supportsAllDrives: true}, {responseType: 'stream'})
+    .then(res => {
+       res.data
+       .on('end', () => {
+          console.log('Done');
+       })
+       .on('error', (err) => {
+          console.error('Error downloading file.');
+       })
+      .pipe(destination);
+    }
+  )
+  .catch((err) => {
+    console.log('ERRORRRREEEEEEEE :', err);
   });
 }
