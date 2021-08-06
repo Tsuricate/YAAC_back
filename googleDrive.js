@@ -94,8 +94,8 @@ function downloadParentFolder(auth) {
 
 const createFolder = (folderName) => {
   try {
-    if (!fs.existsSync(`./assets/${folderName}`)) {
-      fs.mkdirSync(`./assets/${folderName}`);
+    if (!fs.existsSync(`./public/assets/${folderName}`)) {
+      fs.mkdirSync(`./public/assets/${folderName}`);
     }
   } catch (err) {
     console.error('Error creating new folder: ', err);
@@ -129,7 +129,7 @@ const downloadFolderContent = (folderId, auth, folderName) => {
 
 const downloadFileById = (auth, fileId, fileName, folderName) => {
   const drive = google.drive({version: 'v3', auth});
-  const destination = fs.createWriteStream(`./assets/${folderName}/${fileName}`);
+  const destination = fs.createWriteStream(`./public/assets/${folderName}/${fileName}`);
   drive.files.get({fileId: fileId, alt: 'media', supportsAllDrives: true}, {responseType: 'stream'})
     .then(res => {
        res.data

@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs')
 const app = express();
 
 app.use((req, res, next) => {
@@ -8,25 +9,22 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/api/categories', (req, res, next) => {
-  // console.log("SEPARATIOOOOOON");
-  
-/*   const response = {
-    categories: [
-      {
-        id: 1,
-        name: "Body",
-        imageURL: "https://www.earthrangers.com/public/content/wildwire/RedFoxFeaturedImage-1.jpg",
-      },
-      {
-        id: 2,
-        name: "Jaw",
-        imageURL: "https://www.earthrangers.com/public/content/wildwire/RedFoxFeaturedImage-1.jpg",
-      },
-    ],
-  }; */
+app.use(express.static('public'));
 
-  res.status(200).json(response);
+app.get('/api/categories', (req, res, next) => {
+    const filepath = "./public/assets/categories";
+    fs.readdir(filepath, (err, files) => {
+      const categories = files.map((file) => (
+        {
+          id: file,
+          imageUrl: `http://localhost:3001/assets/categories/${file}`,
+        }
+      ));
+      const response = {
+        categories,
+      }
+      res.status(200).json(response);
+    });
 });
 
 module.exports = app;
