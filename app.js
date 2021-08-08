@@ -27,4 +27,30 @@ app.get('/api/categories', (req, res, next) => {
     });
 });
 
+app.get('/api/items/:category', (req, res, next) => {
+    let category = req.params.category;
+    let categoryCapitalized = category.charAt(0).toUpperCase() + category.slice(1);
+    const filepath = `./public/assets/${categoryCapitalized}`;
+
+    fs.readdir(filepath, (err, files) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        const categoryImages = files.map((file) => (
+          {
+            id: file,
+            imageUrl: `http://localhost:3001/assets/${categoryCapitalized}/${file}`,
+          }
+        ));
+        const response = { categoryImages };
+        res.status(200).json(response);
+      }
+    });
+});
+
+// const response = {
+//   items: [body1, body2, body3, body4, body5]
+// }
+
 module.exports = app;
