@@ -1,15 +1,19 @@
 const express = require('express');
-const fs = require('fs')
+const fs = require('fs');
 const app = express();
+const bodyParser = require('body-parser');
+const mergeImages = require('merge-images');
+const { Canvas, Image } = require('node-canvas');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   next();
 });
 
 app.use(express.static('public'));
+app.use(bodyParser.json());
 
 app.get('/api/categories', (req, res, next) => {
     const filepath = "./public/assets/categories";
@@ -62,6 +66,15 @@ app.get('/api/items/:category', (req, res, next) => {
         res.status(200).json(response);
       }
     });
+});
+
+app.post('/api/merge', (req, res, next) => {
+
+  mergeImages(['./public/assets/Jaw/jaw3.png', './public/assets/Body/body1.png'], {
+    Canvas: Canvas,
+    Image: Image
+  })
+  .then((avatar) => console.log(avatar));
 });
 
 module.exports = app;
