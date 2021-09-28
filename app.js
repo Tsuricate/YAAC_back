@@ -70,11 +70,22 @@ app.get('/api/items/:category', (req, res, next) => {
 
 app.post('/api/merge', (req, res, next) => {
 
-  mergeImages(['./public/assets/Jaw/jaw3.png', './public/assets/Body/body1.png'], {
+  let imagesToMerge = req.body.imagesUrl;
+
+  const newArray = imagesToMerge.map((image) => {
+    let imageURI = image.split('assets')[1];
+    return `./public/assets/${imageURI}`;
+  });
+
+  mergeImages(newArray, {
     Canvas: Canvas,
     Image: Image
   })
-  .then((avatar) => console.log(avatar));
+  .then((avatar) => {
+
+    res.set('Content-Type', 'image/png');
+    res.status(200).json({avatar});
+  });
 });
 
 module.exports = app;
