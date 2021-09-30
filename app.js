@@ -2,8 +2,6 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const bodyParser = require('body-parser');
-const mergeImages = require('merge-images');
-const { Canvas, Image } = require('node-canvas');
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -66,26 +64,6 @@ app.get('/api/items/:category', (req, res, next) => {
         res.status(200).json(response);
       }
     });
-});
-
-app.post('/api/merge', (req, res, next) => {
-
-  let imagesToMerge = req.body.imagesUrl;
-
-  const newArray = imagesToMerge.map((image) => {
-    let imageURI = image.split('assets')[1];
-    return `./public/assets/${imageURI}`;
-  });
-
-  mergeImages(newArray, {
-    Canvas: Canvas,
-    Image: Image
-  })
-  .then((avatar) => {
-
-    res.set('Content-Type', 'image/png');
-    res.status(200).json({avatar});
-  });
 });
 
 module.exports = app;
