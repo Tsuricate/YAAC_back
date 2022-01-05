@@ -31,7 +31,7 @@ app.get('/api/categories', (req, res, next) => {
         return (
           {
             id: fileName,
-            imageUrl: `http://localhost:3001/assets/categories/${file}`,
+            imageUrl: `https://yaac-back.vercel.app/assets/categories/${file}`,
             changePosition : changePosition.includes(fileName),
             changeColor : changeColor.includes(fileName),
             isMandatory : isMandatory.includes(fileName),
@@ -60,7 +60,7 @@ app.get('/api/items/:category', (req, res, next) => {
         const categoryImages = files.map((file) => (
           {
             id: file,
-            imageUrl: `http://localhost:3001/assets/${categoryCapitalized}/${file}`,
+            imageUrl: `https://yaac-back.vercel.app/assets/${categoryCapitalized}/${file}`,
             category: category.toLocaleLowerCase(),
           }
         ));
@@ -88,7 +88,7 @@ const getRandomItemFromCategory = (filepath, category) => {
     const randomItem = images[Math.floor(Math.random() * images.length)];
     resolve({
       id: randomItem,
-      imageUrl: `http://localhost:3001/assets/${category}/${randomItem}`,
+      imageUrl: `https://yaac-back.vercel.app/assets/${category}/${randomItem}`,
       category: category.toLowerCase(),
     });
   }))
