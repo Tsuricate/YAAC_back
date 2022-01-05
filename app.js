@@ -10,7 +10,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname + '/public')));
 app.use(bodyParser.json());
 
 const changePosition = ["eyes", "eyebrows", "nose", "mouth", "hair-spike", "face-accessories", "face-details"];
