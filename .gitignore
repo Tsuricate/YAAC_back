@@ -103,6 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
+# Avatar images file
+# public/assets/*
+
 # Secrets
 credentials.json
 token.json
