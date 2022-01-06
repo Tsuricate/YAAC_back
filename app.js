@@ -31,7 +31,7 @@ app.get('/api/categories', (req, res, next) => {
         return (
           {
             id: fileName,
-            imageUrl: `https://yaac-back.vercel.app/assets/categories/${file}`,
+            imageUrl: `/assets/categories/${file}`,
             changePosition : changePosition.includes(fileName),
             changeColor : changeColor.includes(fileName),
             isMandatory : isMandatory.includes(fileName),
@@ -60,7 +60,7 @@ app.get('/api/items/:category', (req, res, next) => {
         const categoryImages = files.map((file) => (
           {
             id: file,
-            imageUrl: `https://yaac-back.vercel.app/assets/${categoryCapitalized}/${file}`,
+            imageUrl: `/assets/${categoryCapitalized}/${file}`,
             category: category.toLocaleLowerCase(),
           }
         ));
@@ -82,18 +82,22 @@ const getRandomItemFromCategory = (filepath, category) => {
     if (err) {
         reject(err);
     }
-    if (!images.length) {
+    if (!images) { 
+      console.log("Images : ", images) 
       resolve();
     }
-    const randomItem = images[Math.floor(Math.random() * images.length)];
-    resolve({
-      id: randomItem,
-      imageUrl: `https://yaac-back.vercel.app/assets/${category}/${randomItem}`,
-      category: category.toLowerCase(),
-    });
+    else {
+      const randomItem = images[Math.floor(Math.random() * images.length)];
+        resolve({
+          id: randomItem,
+          imageUrl: `/assets/${category}/${randomItem}`,
+          category: category.toLowerCase(), 
+        });
+    }
+    
   }))
 
-  return result;
+  return result; 
 };
 
 const getRandomAvatar = () => {
@@ -108,12 +112,12 @@ const getRandomAvatar = () => {
           const promiseArray = [];
           
           folders.forEach(folder => {
-            if (folder !== 'categories' && isMandatory.includes(folder.toLowerCase()) || folder === 'Hair-main') {
+            if ((!['categories', 'index.html'].includes(folder) ) && isMandatory.includes(folder.toLowerCase()) || folder === 'Hair-main') {
               promiseArray.push(
                 getRandomItemFromCategory(filepath, folder)
               )
             } else {
-              if (folder !== 'categories') {
+              if (!['categories', 'index.html'].includes(folder)) {
                 optionalCategories.push(folder);
               }
             }
