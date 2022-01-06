@@ -109,3 +109,7 @@ dist
 # Secrets
 credentials.json
 token.json
+
+# Misc
+yarn.lock
+package-lock.json
