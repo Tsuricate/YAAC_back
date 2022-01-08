@@ -1,3 +1,4 @@
+require('dotenv').config();
 const fs = require('fs');
 const readline = require('readline');
 const {google} = require('googleapis');
@@ -73,7 +74,7 @@ function getAccessToken(oAuth2Client, callback) {
 function downloadParentFolder(auth) {
   const drive = google.drive({version: 'v3', auth});
   drive.files.list({
-    q: `'1XQXzpiqFt279_pBUPhSIzVvi7Ck8dmQ8' in parents`,
+    q: `'${process.env.GDRIVE_FOLDER_ID}' in parents`,
     pageSize: 20,
     fields: 'nextPageToken, files(id, name, mimeType)',
   }, (err, res) => {
